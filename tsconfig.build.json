@@ -1,9 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist",
+    "outDir": "./dist/temp",
     "declaration": true,
     "sourceMap": false,
+    "emitDeclarationOnly": true
   },
   "include": ["src/*"],
   "exclude": ["tests/*", "node_modules/*", "assets/*", "sandbox/*"],

@@ -1,9 +1,8 @@
-import React from "react";
+// import React from "react";
 import "./styles.css";
 import { IsNotEmpty, IsPositive } from "class-validator";
 // import { object, string, number } from "yup";
-import { useForm, useField } from "./hooks";
-import { createClassValidator } from "./validators";
+import { useForm, useField, createClassValidator } from "react-inverted-form";
 
 console.clear();
 
@@ -33,11 +32,11 @@ const Options: React.FC<{
   const handleClick = (i: number) => () => {
     onChange?.({
       key: i,
-      value: `Value for option ${i}`
+      value: `Value for option ${i}`,
     });
     onBlur?.({
       key: i,
-      value: `Value for option ${i}`
+      value: `Value for option ${i}`,
     });
   };
 
@@ -97,7 +96,7 @@ export default function App() {
     stepToNext,
     stepToPrevious,
     stepToFirst,
-    stepToLast
+    stepToLast,
   } = useForm<FormState>({
     formId: "foo",
     defaultValues: {
@@ -106,8 +105,8 @@ export default function App() {
       age: 29,
       options: {
         key: 0,
-        value: ""
-      }
+        value: "",
+      },
     },
     stateReducer: (state, action, next) => {
       switch (action.type) {
@@ -118,8 +117,8 @@ export default function App() {
               ...next,
               values: {
                 ...next.values,
-                [name]: parseFloat(value)
-              }
+                [name]: parseFloat(value),
+              },
             };
           }
           return next;
@@ -131,7 +130,7 @@ export default function App() {
     validator,
     onSubmit: async (values) => {
       alert(JSON.stringify(values, null, 4));
-    }
+    },
   });
 
   const nameField = useField<FormState>("name", "foo");
