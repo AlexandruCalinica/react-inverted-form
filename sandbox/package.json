@@ -26,8 +26,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "unlink": "npm rm react-inverted-form",
-    "link": "npm run unlink && cd ../dist && npm link && cd ../sandbox && npm link react-inverted-form"
+    "unlink": "rm -rf ./node_modules/react-inverted-form",
+    "link": "cp -r ../dist ./node_modules/react-inverted-form"
   },
   "eslintConfig": {
     "extends": [
