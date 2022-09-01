@@ -20,7 +20,7 @@
     "build": "npm run clean && rollup -c ./rollup.config.js && npm run type && npm run copy:assets",
     "copy:assets": "cp ./package.json ./dist/package.json",
     "test:unit": "jest --silent",
-    "type": "tsc --project tsconfig.build.json && rollup -c ./scripts/rollup.dts.config.js && rm -rf ./dist/temp",
+    "type": "tsc --project tsconfig.build.json && rollup -c ./rollup.dts.config.js && rm -rf ./dist/temp",
     "semantic-release": "semantic-release",
     "prepare": "husky install"
   },
