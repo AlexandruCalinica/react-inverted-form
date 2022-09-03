@@ -27,7 +27,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "unlink": "rm -rf ./node_modules/react-inverted-form",
-    "link": "cp -r ../dist ./node_modules/react-inverted-form"
+    "link": "cp -r ../../dist ./node_modules/react-inverted-form"
   },
   "eslintConfig": {
     "extends": [

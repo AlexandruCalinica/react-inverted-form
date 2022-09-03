@@ -1,0 +1,2 @@
+this package.json is used for local development only.
+It is a copy of the original package.json but with the "prepare" script removed in order to avoid running the husky prepare script while doing a local "npm link" inside sandbox projects.

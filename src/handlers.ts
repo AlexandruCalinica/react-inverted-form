@@ -25,7 +25,10 @@ interface StoreHandlers {
   stepToFirst: () => void;
   stepToLast: () => void;
   validate: <T extends GenericObject>(options?: ValidateOptions) => void;
-  handleChangeCallback: <T extends GenericObject>() => void;
+  handleChangeCallback: <T extends GenericObject>(
+    name: keyof T,
+    value: any
+  ) => void;
   handleFieldChange: <T extends GenericObject>(
     name: keyof T
   ) => (e: any) => void;
@@ -87,18 +90,18 @@ export function getStoreHandlers(
         try {
           if (options?.attemptedSubmit) {
             if (form.attemptedSubmit) {
-              const validationErrors = await form.handlers.validate(
+              const validationErrors = await form.handlers.validate?.(
                 values,
                 getMetaProps<T>(state)
               );
-              setValidationErrors(validationErrors);
+              validationErrors && setValidationErrors(validationErrors);
             }
           } else {
-            const validationErrors = await form.handlers.validate(
+            const validationErrors = await form.handlers.validate?.(
               values,
               getMetaProps<T>(state)
             );
-            setValidationErrors(validationErrors);
+            validationErrors && setValidationErrors(validationErrors);
           }
         } catch (error) {
           console.error(error);
@@ -107,11 +110,15 @@ export function getStoreHandlers(
       .unsubscribe();
   }
 
-  function handleChangeCallback<T extends GenericObject>() {
+  function handleChangeCallback<T extends GenericObject>(
+    name: keyof T,
+    value: any
+  ) {
     store
       .subscribe(key, (state) => {
         const { values, form } = state;
-        form.handlers.change(values, getMetaProps<T>(state));
+        const nextValues = mergeCurrentWithPrevious<T>(name, value, values);
+        form.handlers.change?.(nextValues, getMetaProps<T>(state));
       })
       .unsubscribe();
   }
@@ -123,6 +130,8 @@ export function getStoreHandlers(
       }
 
       validate<T>({ attemptedSubmit: true });
+
+      handleChangeCallback<T>(name, value);
 
       store.dispatch(key, { type: "FIELD_CHANGE", payload: { name, value } });
       store.dispatch(key, {
@@ -160,7 +169,7 @@ export function getStoreHandlers(
   function handleSubmit<T extends GenericObject>(
     e: FormEvent<HTMLFormElement>
   ) {
-    e.preventDefault();
+    e?.preventDefault?.();
     store.dispatch(key, { type: "ATTEMPTED_SUBMIT" });
 
     store
@@ -171,8 +180,8 @@ export function getStoreHandlers(
         const metaProps = getMetaProps<T>(state);
 
         try {
-          const errors = await validate(values, metaProps);
-          if (Object.keys(errors).length > 0) {
+          const errors = await validate?.(values, metaProps);
+          if (errors && Object.keys(errors).length > 0) {
             setValidationErrors(errors);
           } else {
             store.dispatch(key, { type: "IS_SUBMITTING" });

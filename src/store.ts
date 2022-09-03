@@ -5,7 +5,7 @@ import {
   Subscription,
   BehaviorSubject,
   distinctUntilChanged,
-  distinctUntilKeyChanged
+  distinctUntilKeyChanged,
 } from "rxjs";
 import isEqual from "lodash/isEqual";
 
@@ -22,15 +22,13 @@ export class Store<T> {
   }
 
   init(key: string) {
-    if (!this._reducers[key]) {
-      Object.assign(this._reducers, { [key]: reducer });
-    }
+    if (!!this._reducers[key]) return;
+    Object.assign(this._reducers, { [key]: reducer });
 
-    if (!this._states[key]) {
-      Object.assign(this._states, {
-        [key]: new BehaviorSubject(getInitialState())
-      });
-    }
+    if (!!this._states[key]) return;
+    Object.assign(this._states, {
+      [key]: new BehaviorSubject(getInitialState()),
+    });
   }
 
   setReducer(

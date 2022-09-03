@@ -510,11 +510,11 @@ describe("Store handlers", () => {
     handlers.registerField("name");
     handlers.setDefaultValues({ name: "John Doe" });
     handlers.setHandlers({ change });
-    handlers.handleChangeCallback();
+    handlers.handleChangeCallback("name", "John Doe");
 
     it("should be callable", () => {
       expect(handleChangeCallbackSpy).toHaveBeenCalled();
-      expect(handleChangeCallbackSpy).toHaveBeenCalledWith();
+      expect(handleChangeCallbackSpy).toHaveBeenCalledWith("name", "John Doe");
     });
 
     it('should call the "change" callback with value and metaProps', () => {

@@ -8,6 +8,7 @@ import {
   FieldProps,
   GenericObject,
   FormMetaProps,
+  UseFieldOptions,
 } from "./types";
 import { getStoreHandlers } from "./handlers";
 
@@ -27,7 +28,8 @@ export function useFormState<T extends GenericObject>(formId: string) {
 
 export function useField<T extends GenericObject>(
   name: keyof T,
-  formId: string
+  formId: string,
+  options?: UseFieldOptions
 ) {
   const [state, setState] = useState<{ value: any; meta: FieldProps }>({
     value: undefined,
@@ -48,8 +50,9 @@ export function useField<T extends GenericObject>(
       name,
       id: name,
       value: state.value,
-      onBlur: handleFieldBlur(name),
-      onChange: handleFieldChange(name),
+      onBlur: !options?.native ? handleFieldBlur(name) : undefined,
+      onChange: !options?.native ? handleFieldChange(name) : undefined,
+      onChangeText: options?.native ? handleFieldChange(name) : undefined,
     };
   };
 
@@ -57,6 +60,10 @@ export function useField<T extends GenericObject>(
     if (!state.meta?.error) return null;
     return renderer(state.meta.error ?? "");
   };
+
+  useEffect(() => {
+    store.init(formId);
+  }, []);
 
   useEffect(() => {
     const subscription = store

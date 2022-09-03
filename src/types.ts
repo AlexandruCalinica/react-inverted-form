@@ -76,3 +76,6 @@ export type FormState<T extends GenericObject> = {
 };
 
 export type StoreState = { [k: string]: FormState<GenericObject> };
+export type UseFieldOptions = {
+  native?: boolean;
+};

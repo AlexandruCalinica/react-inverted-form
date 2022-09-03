@@ -8,8 +8,8 @@
     "type": "git",
     "url": "https://github.com/AlexandruCalinica/react-inverted-form.git"
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "index.js",
+  "types": "index.d.ts",
   "sideEffects": false,
   "files": [
     "/dist"
@@ -22,8 +22,7 @@
     "copy:assets": "cp ./package.json ./dist/package.json",
     "test:unit": "jest --silent",
     "type": "tsc --project tsconfig.build.json && rollup -c ./rollup.dts.config.js && rm -rf ./dist/temp",
-    "semantic-release": "semantic-release",
-    "prepare": "husky install"
+    "semantic-release": "semantic-release"
   },
   "peerDependencies": {
     "class-validator": "^0.13.2",
