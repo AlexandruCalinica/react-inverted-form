@@ -1,8 +1,7 @@
 # react-inverted-form
+Form management solution for React that offers unparalleled flexibility via inversion of control patterns.
 
 [![CI](https://github.com/AlexandruCalinica/react-inverted-form/actions/workflows/workflow.yaml/badge.svg)](https://github.com/AlexandruCalinica/react-inverted-form/actions/workflows/workflow.yaml)
-
-Form management solution for React that offers unparalleled flexibility via inversion of control patterns.
 
 ### Key features
 1. Headless approach
@@ -36,7 +35,7 @@ import {
 } from 'react-inverted-form';
 ```
 
-### `useForm<T extends GenericObject>(options: UseFormOptions<T>): FormMethods<T>`
+#### `useForm<T extends GenericObject>(options: UseFormOptions<T>): FormMethods<T>`
 ```ts
 const {
   state,
@@ -47,6 +46,7 @@ const {
   stepToPrevious,
   setCurrentStep,
   setDefaultValues,
+  setValidationErrors,
 } = useForm<User>({
   formId: 'user',
   totalSteps: 3,
@@ -83,9 +83,10 @@ const {
 * `handleSubmit: () => void` - Submits the form.
 * `setCurrentStep: (step: number) => void` - Sets the current step in the form stepper.
 * `setDefaultValues: (values: T) => void` - Sets the default values for the form.
+* `setValidationErrors: (errors: Partial<{ [k in keyof T]: string }>) => void` - Imperatively set validation errors for the form.
 
 
-### `useField<T extends GenericObject>(name: keyof T, formId: string, options?: UseFieldOptions): FieldMethods<T>`
+#### `useField<T extends GenericObject>(name: keyof T, formId: string, options?: UseFieldOptions): FieldMethods<T>`
 ```ts
 const {
   state,
@@ -117,7 +118,7 @@ const {
     htmlFor: keyof T;
 }` - A function that returns the props that must be passed to the label of the input field.
 
-### `useFormState<T extends GenericObject>(formId: string): FormState<T>`
+#### `useFormState<T extends GenericObject>(formId: string): FormState<T>`
 ```ts
 const state = useFormState<User>('user');
 ```
@@ -127,7 +128,7 @@ const state = useFormState<User>('user');
 
 ### Validators
 `react-inverted-form` comes with two built in validators. One for `yup` and one for `class-validator`. You can also create your own validator.
-### `createYupValidator(schema: AnySchema): (values: any) => Promise<Record<string, any>>`
+#### `createYupValidator(schema: AnySchema): (values: any) => Promise<Record<string, any>>`
 ```ts
 const formSchema = object({
   name: string().required("Name is required"),
@@ -138,7 +139,7 @@ const formSchema = object({
 const validator = createYupValidator(formSchema);
 ```
 
-### `createClassValidator<T extends Object>(Constructor: new () => T): (values: any) => Promise<Record<string, any>>`
+#### `createClassValidator<T extends Object>(Constructor: new () => T): (values: any) => Promise<Record<string, any>>`
 ```ts
 class User {
   @IsNotEmpty()
@@ -155,7 +156,40 @@ class User {
 const validator = createClassValidator(User);
 ```
 
-### `custom validator`
+#### `createYupSyncValidator(schema: AnySchema): (values: any) => Record<string, any>`
+
+Synchronous version of `createYupValidator`. Useful for validating values manually inside stateReducer.
+
+```ts
+const formSchema = object({
+  name: string().required("Name is required"),
+  surname: string().required("Surname is required"),
+  age: number().positive().required("Age is required")
+});
+
+const validator = createYupSyncValidator(formSchema);
+```
+
+#### `createClassSyncValidator<T extends Object>(Constructor: new () => T): (values: any) => Record<string, any>`
+
+Synchronous version of `createClassValidator`. Useful for validating values manually inside stateReducer.
+
+```ts
+class User {
+  @IsNotEmpty()
+  name: string;
+
+  @IsNotEmpty()
+  surname: string;
+
+  @IsPositive()
+  @IsNotEmpty()
+  age: number;
+}
+
+const validator = createClassSyncValidator(User);
+```
+#### `custom validator`
 `validator` property of `UseFormOptions` can be used to create a custom validator. The validator must return a promise that resolves to an object of type `Partial<{ [k in keyof T]: string }>`.
 
 ```ts
@@ -180,7 +214,7 @@ const validator = (values: any) => {
 };
 ```
 
-## State shape
+### State shape
 ```json
 {
     "values": {
@@ -193,14 +227,16 @@ const validator = (values: any) => {
                 "pristine": true,
                 "hasError": false,
                 "isTouched": false
-            }
+            },
+            "error": ""
         },
         "surname": {
             "meta": {
                 "pristine": true,
                 "hasError": false,
                 "isTouched": false
-            }
+            },
+            "error": ""
         },
     },
     "steps": {

@@ -112,6 +112,7 @@ export function useForm<T extends GenericObject>(options: UseFormOptions<T>) {
     stepToPrevious,
     setCurrentStep,
     setDefaultValues,
+    setValidationErrors,
     setDefaultCurrentStep,
   } = getStoreHandlers(options.formId, store);
 
@@ -155,5 +156,6 @@ export function useForm<T extends GenericObject>(options: UseFormOptions<T>) {
     stepToPrevious,
     handleSubmit,
     setDefaultValues,
+    setValidationErrors,
   };
 }

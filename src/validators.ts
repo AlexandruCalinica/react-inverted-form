@@ -1,4 +1,4 @@
-import { validate } from "class-validator";
+import { validate, validateSync } from "class-validator";
 import { ValidationError, AnySchema } from "yup";
 
 export function createYupValidator(schema: AnySchema) {
@@ -7,6 +7,29 @@ export function createYupValidator(schema: AnySchema) {
 
     try {
       await schema.validate(values, { abortEarly: false, strict: true });
+    } catch (err) {
+      const keys = Object.keys((err as ValidationError).value)
+        .sort()
+        .reverse();
+      const messages = (err as ValidationError).errors;
+
+      const out = keys.reduce(
+        (acc, curr, idx) => ({ ...acc, [curr]: messages[idx] }),
+        {}
+      );
+      Object.assign(errors, out);
+    }
+
+    return errors;
+  };
+}
+
+export function createYupSyncValidator(schema: AnySchema) {
+  return function yupSyncValidator(values: any) {
+    let errors = {};
+
+    try {
+      schema.validateSync(values, { abortEarly: false, strict: true });
     } catch (err) {
       const keys = Object.keys((err as ValidationError).value)
         .sort()
@@ -38,7 +61,32 @@ export function createClassValidator<T extends object>(
       const out = err.reduce(
         (acc, curr) => ({
           ...acc,
-          [curr.property]: Object.values(curr?.constraints ?? {})[0]
+          [curr.property]: Object.values(curr?.constraints ?? {})[0],
+        }),
+        {}
+      );
+      Object.assign(errors, out);
+    } catch (error) {}
+
+    return errors;
+  };
+}
+
+export function createClassSyncValidator<T extends object>(
+  Constructor: new () => T
+) {
+  let constructor = new Constructor();
+
+  return function classValidator(values: any) {
+    let errors = {};
+    Object.assign(constructor, values);
+
+    try {
+      const err = validateSync(constructor);
+      const out = err.reduce(
+        (acc, curr) => ({
+          ...acc,
+          [curr.property]: Object.values(curr?.constraints ?? {})[0],
         }),
         {}
       );
