@@ -84,6 +84,7 @@ const {
 * `setCurrentStep: (step: number) => void` - Sets the current step in the form stepper.
 * `setDefaultValues: (values: T) => void` - Sets the default values for the form.
 * `setValidationErrors: (errors: Partial<{ [k in keyof T]: string }>) => void` - Imperatively set validation errors for the form.
+* `asyncDispatch: (type: ActionType, payload: (state: FormState<T>) => Promise<unknown>) => void` - Dispatches an action to the form's state reducer. The callback receives the form's current state and returns a promise that resolves to the next state. This method is useful for dispatching async actions inside the state reducer.
 
 
 #### `useField<T extends GenericObject>(name: keyof T, formId: string, options?: UseFieldOptions): FieldMethods<T>`

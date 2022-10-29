@@ -1,7 +1,7 @@
 import { BaseSyntheticEvent, FormEvent } from "react";
 
 import { Store } from "./store";
-import { GenericObject, FormHandlers, FormState } from "./types";
+import { GenericObject, FormHandlers, FormState, ActionType } from "./types";
 import { mergeCurrentWithPrevious, getMetaProps } from "./utils";
 
 interface ValidateOptions {
@@ -35,6 +35,10 @@ interface StoreHandlers {
   handleFieldBlur: <T extends GenericObject>(name: keyof T) => (e: any) => void;
   handleSubmit: <T extends GenericObject>(
     event: FormEvent<HTMLFormElement>
+  ) => void;
+  asyncDispatch: <T extends GenericObject>(
+    type: ActionType,
+    payload: (state: FormState<T>) => Promise<unknown>
   ) => void;
 }
 
@@ -196,6 +200,13 @@ export function getStoreHandlers(
       .unsubscribe();
   }
 
+  function asyncDispatch(
+    type: ActionType,
+    payload: (store: FormState<any>) => Promise<unknown>
+  ) {
+    store.asyncDispatch(key, type, payload);
+  }
+
   return {
     registerField,
     setDefaultValues,
@@ -213,5 +224,6 @@ export function getStoreHandlers(
     handleFieldChange,
     handleFieldBlur,
     handleSubmit,
+    asyncDispatch,
   };
 }

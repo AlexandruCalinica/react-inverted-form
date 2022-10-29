@@ -2,7 +2,12 @@
 import "./styles.css";
 import { IsNotEmpty, IsPositive } from "class-validator";
 // import { object, string, number } from "yup";
-import { useForm, useField, createClassValidator } from "react-inverted-form";
+import {
+  useForm,
+  useField,
+  createClassValidator,
+  createClassSyncValidator,
+} from "./react-inverted-form";
 
 console.clear();
 
@@ -83,6 +88,15 @@ class Form implements FormState {
 }
 const validator = createClassValidator(Form);
 
+class Step1Schema {
+  @IsNotEmpty()
+  name = "";
+
+  @IsNotEmpty()
+  surname = "";
+}
+const validateStep1 = createClassSyncValidator(Step1Schema);
+
 // const formSchema = object({
 //   name: string().required("Name is required"),
 //   surname: string().required("Surname is required"),
@@ -97,6 +111,8 @@ export default function App() {
     stepToPrevious,
     stepToFirst,
     stepToLast,
+    asyncDispatch,
+    setValidationErrors,
   } = useForm<FormState>({
     formId: "foo",
     defaultValues: {
@@ -120,6 +136,20 @@ export default function App() {
                 [name]: parseFloat(value),
               },
             };
+          }
+          return next;
+        case "STEP_TO_NEXT":
+          if (state.steps.current === 1) {
+            const { name, surname } = state.values;
+            const errors = validateStep1({ name, surname });
+
+            asyncDispatch("SET_VALIDATION_ERRORS", async () => {
+              return errors;
+            });
+
+            if (Object.values(errors).length > 0) {
+              return state;
+            }
           }
           return next;
         default:
