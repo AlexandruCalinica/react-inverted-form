@@ -42,7 +42,7 @@ export function useField<T extends GenericObject>(
   );
 
   const getLabelProps = () => ({
-    htmlFor: name,
+    htmlFor: String(name),
   });
 
   const getInputProps = () => {
