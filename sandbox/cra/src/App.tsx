@@ -112,7 +112,7 @@ export default function App() {
     stepToFirst,
     stepToLast,
     asyncDispatch,
-    setValidationErrors,
+    reset,
   } = useForm<FormState>({
     formId: "foo",
     defaultValues: {
@@ -124,6 +124,7 @@ export default function App() {
         value: "",
       },
     },
+    debug: true,
     stateReducer: (state, action, next) => {
       switch (action.type) {
         case "FIELD_CHANGE":
@@ -240,6 +241,7 @@ export default function App() {
 
         <button type="submit">Submit</button>
       </form>
+      <button onClick={reset}>reset</button>
     </div>
   );
 }

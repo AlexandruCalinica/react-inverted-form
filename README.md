@@ -57,6 +57,7 @@ const {
   onSubmit: async (values) => {},
   validator: createYupValidator(schema),
   stateReducer: (state, action, next) => next,
+  debug: false,
 });
 ```
 `useForm` is the main hook that you will use to create a form. It returns a set of methods that you can use to control the form's state. The methods also contain the form's current state which can be used to react uppon. This hook also accepts a generic type which is the type of the form's values. The generic type is used to type the form's state, methods and the validator.
@@ -72,6 +73,7 @@ const {
 * `onSubmit?: (values: T) => Promise<void>` - Callback for when the form is submitted.
 * `validator?: (values: T, metaProps: FormMetaProps<T>) => Promise<Partial<{ [k in keyof T]: string }>>;` - Validator for the form.
 * `stateReducer?: (state: FormState<T>, action: Action, next: FormState<T>) => FormState<T>` - State reducer for the form.
+* `debug?: boolean` - Whether to record the history of form's actions. Defaults to `false`.
   
 `useForm` returns an object of type `FormMethods` which contains the following properties:
 #### `FormMethods<T extends GenericObject>`
@@ -84,7 +86,8 @@ const {
 * `setCurrentStep: (step: number) => void` - Sets the current step in the form stepper.
 * `setDefaultValues: (values: T) => void` - Sets the default values for the form.
 * `setValidationErrors: (errors: Partial<{ [k in keyof T]: string }>) => void` - Imperatively set validation errors for the form.
-* `asyncDispatch: (type: ActionType, payload: (state: FormState<T>) => Promise<unknown>) => void` - Dispatches an action to the form's state reducer. The callback receives the form's current state and returns a promise that resolves to the next state. This method is useful for dispatching async actions inside the state reducer.
+* `asyncDispatch: (type: ActionType, payload: (state: FormState<T>, options?: { formId?: string }) => Promise<unknown>) => void` - Dispatches an action to the form's state reducer. The callback receives the form's current state and returns a promise that resolves to the next state. This method is useful for dispatching async actions inside the state reducer. Optionally, it receives a formId in the options argument usefull for dispathing actions inside other forms.
+* `reset: () => void` - Resets the form's state to the initial state.
 
 
 #### `useField<T extends GenericObject>(name: keyof T, formId: string, options?: UseFieldOptions): FieldMethods<T>`
@@ -252,7 +255,10 @@ const validator = (values: any) => {
         "attemptedSubmit": false,
         "hasDefaultValues": true,
         "hasDefaultCurrentStep": false,
-        "handlers": {}
+        "handlers": {},
+        "history": [],
+        "snapshot": null,
+        "debug": false
     }
 }
 ```

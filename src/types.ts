@@ -18,7 +18,9 @@ export type ActionType =
   | "STEP_TO_NEXT"
   | "STEP_TO_PREVIOUS"
   | "STEP_TO_FIRST"
-  | "STEP_TO_LAST";
+  | "STEP_TO_LAST"
+  | "SNAPSHOT_STATE"
+  | "RESET";
 
 export type ActionPayload = any;
 export type Action = {
@@ -42,7 +44,7 @@ export type Fields<T> = Record<keyof T, FieldProps>;
 export interface FormMetaProps<T extends GenericObject>
   extends Omit<FormState<T>, "values"> {}
 
-export type FormHandlers<T> = {
+export type FormHandlers<T extends GenericObject> = {
   change: (values: T, formMeta: FormMetaProps<T>) => void;
   blur: (values: T, formMeta: FormMetaProps<T>) => void;
   submit: (values: T, formMeta: FormMetaProps<T>) => Promise<void>;
@@ -52,13 +54,23 @@ export type FormHandlers<T> = {
   ) => Promise<Partial<{ [k in keyof T]: string }>>;
 };
 
-export type FormMeta<T> = {
+export type Snapshot<T extends GenericObject> = {
+  values: T;
+  fields: Fields<T>;
+  steps: FormSteps;
+  form: Omit<FormMeta<T>, "snapshot" | "history" | "debug" | "handlers">;
+};
+
+export type FormMeta<T extends GenericObject> = {
   isSubmitting: boolean;
   hasSubmitted: boolean;
   attemptedSubmit: boolean;
   hasDefaultValues: boolean;
   hasDefaultCurrentStep: boolean;
   handlers: FormHandlers<T>;
+  snapshot: Snapshot<T> | null;
+  history: Action[];
+  debug: boolean;
 };
 
 export type FormSteps = {

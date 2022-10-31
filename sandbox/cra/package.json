@@ -28,8 +28,8 @@
     "eject": "react-scripts eject",
     "unlink": "rm -rf ./node_modules/react-inverted-form",
     "link": "cp -r ../../dist ./node_modules/react-inverted-form",
-    "copy:dist": "rm -rf ./react-inverted-form && cp -r ../../dist ./src/react-inverted-form",
-    "copy:src": "rm -rf ./react-inverted-form && cp -r ../../src ./src/react-inverted-form",
+    "copy:dist": "rm -rf ./src/react-inverted-form && cp -r ../../dist ./src/react-inverted-form",
+    "copy:src": "rm -rf ./src/react-inverted-form && cp -r ../../src ./src/react-inverted-form",
     "sync:src": "rm -rf ../../src && cp -r ./src/react-inverted-form ../../src"
   },
   "eslintConfig": {

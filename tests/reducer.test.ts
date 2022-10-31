@@ -1,22 +1,44 @@
 import * as core from "../src/core";
 
+interface TestShape {
+  name: string;
+}
+
 describe("reducer", () => {
   const { reducer, getInitialState } = core;
-  const initialState = getInitialState();
+  const initialState = getInitialState<TestShape>();
 
-  const stateWithField = reducer(initialState, {
+  const stateWithField = reducer<TestShape>(initialState, {
     type: "REGISTER_FIELD",
     payload: "name",
   });
 
   test("INIT", () => {
-    const nextState = reducer(initialState, { type: "INIT" });
+    const nextState = reducer<TestShape>(initialState, { type: "INIT" });
 
     expect(JSON.stringify(nextState)).toBe(JSON.stringify(initialState));
   });
 
+  test("INIT with debug", () => {
+    const nextState = reducer<TestShape>(initialState, {
+      type: "INIT",
+      payload: { debug: true },
+    });
+
+    expect(JSON.stringify(nextState)).toBe(
+      JSON.stringify({
+        ...initialState,
+        form: {
+          ...initialState.form,
+          debug: true,
+          history: [{ type: "INIT", payload: { debug: true } }],
+        },
+      })
+    );
+  });
+
   test("REGISTER_FIELD", () => {
-    const nextState = reducer(initialState, {
+    const nextState = reducer<TestShape>(initialState, {
       type: "REGISTER_FIELD",
       payload: "name",
     });
@@ -34,7 +56,7 @@ describe("reducer", () => {
   });
 
   test("SET_DEFAULT_VALUES", () => {
-    const nextState = reducer(initialState, {
+    const nextState = reducer<TestShape>(initialState, {
       type: "SET_DEFAULT_VALUES",
       payload: { name: "John Doe" },
     });
@@ -53,7 +75,7 @@ describe("reducer", () => {
       submit: jest.fn(),
       validate: jest.fn(),
     };
-    const nextState = reducer(initialState, {
+    const nextState = reducer<TestShape>(initialState, {
       type: "SET_HANDLERS",
       payload: mockHandlers,
     });
@@ -63,7 +85,7 @@ describe("reducer", () => {
   });
 
   test("FIELD_CHANGE", () => {
-    const nextState = reducer(stateWithField, {
+    const nextState = reducer<TestShape>(stateWithField, {
       type: "FIELD_CHANGE",
       payload: {
         name: "name",
@@ -78,7 +100,7 @@ describe("reducer", () => {
   test("SET_FIELD_PRISTINE", () => {
     expect(stateWithField.fields["name"].meta.pristine).toBe(true);
 
-    const nextState = reducer(stateWithField, {
+    const nextState = reducer<TestShape>(stateWithField, {
       type: "SET_FIELD_PRISTINE",
       payload: {
         name: "name",
@@ -91,7 +113,7 @@ describe("reducer", () => {
   });
 
   test("FIELD_BLUR", () => {
-    const nextState = reducer(stateWithField, {
+    const nextState = reducer<TestShape>(stateWithField, {
       type: "FIELD_BLUR",
       payload: {
         name: "name",
@@ -104,7 +126,7 @@ describe("reducer", () => {
   });
 
   test("SET_FIELD_TOUCHED", () => {
-    const nextState = reducer(stateWithField, {
+    const nextState = reducer<TestShape>(stateWithField, {
       type: "SET_FIELD_TOUCHED",
       payload: {
         name: "name",
@@ -117,7 +139,7 @@ describe("reducer", () => {
   });
 
   test("SET_VALIDATION_ERRORS", () => {
-    const nextState = reducer(stateWithField, {
+    const nextState = reducer<TestShape>(stateWithField, {
       type: "SET_VALIDATION_ERRORS",
       payload: {
         name: "This is a validation error.",
@@ -130,7 +152,7 @@ describe("reducer", () => {
     expect(nextState.fields["name"].meta.hasError).toBe(true);
     expect(nextState.fields["name"].error).toBe("This is a validation error.");
 
-    const nextState2 = reducer(nextState, {
+    const nextState2 = reducer<TestShape>(nextState, {
       type: "SET_VALIDATION_ERRORS",
       payload: {},
     });
@@ -144,7 +166,7 @@ describe("reducer", () => {
   test("IS_SUBMITTING", () => {
     expect(initialState.form.isSubmitting).toBe(false);
 
-    const nextState = reducer(initialState, {
+    const nextState = reducer<TestShape>(initialState, {
       type: "IS_SUBMITTING",
     });
 
@@ -153,12 +175,12 @@ describe("reducer", () => {
 
   test("HAS_SUBMITTED", () => {
     expect(initialState.form.hasSubmitted).toBe(false);
-    const s1 = reducer(initialState, {
+    const s1 = reducer<TestShape>(initialState, {
       type: "IS_SUBMITTING",
     });
     expect(s1.form.isSubmitting).toBe(true);
 
-    const nextState = reducer(s1, {
+    const nextState = reducer<TestShape>(s1, {
       type: "HAS_SUBMITTED",
     });
 
@@ -169,7 +191,7 @@ describe("reducer", () => {
   test("ATTEMPTED_SUBMIT", () => {
     expect(initialState.form.attemptedSubmit).toBe(false);
 
-    const nextState = reducer(initialState, {
+    const nextState = reducer<TestShape>(initialState, {
       type: "ATTEMPTED_SUBMIT",
     });
 
@@ -179,7 +201,7 @@ describe("reducer", () => {
   test("SET_TOTAL_STEPS", () => {
     expect(initialState.steps.total).toBe(1);
 
-    const nextState = reducer(initialState, {
+    const nextState = reducer<TestShape>(initialState, {
       type: "SET_TOTAL_STEPS",
       payload: 3,
     });
@@ -188,7 +210,7 @@ describe("reducer", () => {
   });
 
   test("SET_DEFAULT_CURRENT_STEP", () => {
-    const s1 = reducer(initialState, {
+    const s1 = reducer<TestShape>(initialState, {
       type: "SET_DEFAULT_CURRENT_STEP",
       payload: 2,
     });
@@ -198,7 +220,7 @@ describe("reducer", () => {
     expect(s1.steps.canPrevious).toBe(true);
     expect(s1.form.hasDefaultCurrentStep).toBe(true);
 
-    const s2 = reducer(
+    const s2 = reducer<TestShape>(
       {
         ...initialState,
         steps: {
@@ -219,7 +241,7 @@ describe("reducer", () => {
   });
 
   test("SET_CURRENT_STEP", () => {
-    const s1 = reducer(initialState, {
+    const s1 = reducer<TestShape>(initialState, {
       type: "SET_CURRENT_STEP",
       payload: 2,
     });
@@ -229,7 +251,7 @@ describe("reducer", () => {
     expect(s1.steps.canPrevious).toBe(true);
     expect(s1.form.hasDefaultCurrentStep).toBe(false);
 
-    const s2 = reducer(
+    const s2 = reducer<TestShape>(
       {
         ...initialState,
         steps: {
@@ -250,11 +272,11 @@ describe("reducer", () => {
   });
 
   test("STEP_TO_NEXT", () => {
-    const s1 = reducer(initialState, {
+    const s1 = reducer<TestShape>(initialState, {
       type: "SET_TOTAL_STEPS",
       payload: 3,
     });
-    const s2 = reducer(s1, {
+    const s2 = reducer<TestShape>(s1, {
       type: "STEP_TO_NEXT",
     });
 
@@ -262,7 +284,7 @@ describe("reducer", () => {
     expect(s2.steps.canNext).toBe(true);
     expect(s2.steps.canPrevious).toBe(true);
 
-    const s3 = reducer(s2, {
+    const s3 = reducer<TestShape>(s2, {
       type: "STEP_TO_NEXT",
     });
     expect(s3.steps.current).toBe(3);
@@ -271,15 +293,15 @@ describe("reducer", () => {
   });
 
   test("STEP_TO_PREVIOUS", () => {
-    const s1 = reducer(initialState, {
+    const s1 = reducer<TestShape>(initialState, {
       type: "SET_TOTAL_STEPS",
       payload: 3,
     });
-    const s2 = reducer(s1, {
+    const s2 = reducer<TestShape>(s1, {
       type: "SET_DEFAULT_CURRENT_STEP",
       payload: 3,
     });
-    const s3 = reducer(s2, {
+    const s3 = reducer<TestShape>(s2, {
       type: "STEP_TO_PREVIOUS",
     });
 
@@ -287,7 +309,7 @@ describe("reducer", () => {
     expect(s3.steps.canNext).toBe(true);
     expect(s3.steps.canPrevious).toBe(true);
 
-    const s4 = reducer(s3, {
+    const s4 = reducer<TestShape>(s3, {
       type: "STEP_TO_PREVIOUS",
     });
 
@@ -297,15 +319,15 @@ describe("reducer", () => {
   });
 
   test("STEP_TO_FIRST", () => {
-    const s1 = reducer(initialState, {
+    const s1 = reducer<TestShape>(initialState, {
       type: "SET_TOTAL_STEPS",
       payload: 3,
     });
-    const s2 = reducer(s1, {
+    const s2 = reducer<TestShape>(s1, {
       type: "SET_DEFAULT_CURRENT_STEP",
       payload: 3,
     });
-    const s3 = reducer(s2, {
+    const s3 = reducer<TestShape>(s2, {
       type: "STEP_TO_FIRST",
     });
 
@@ -315,16 +337,118 @@ describe("reducer", () => {
   });
 
   test("STEP_TO_LAST", () => {
-    const s1 = reducer(initialState, {
+    const s1 = reducer<TestShape>(initialState, {
       type: "SET_TOTAL_STEPS",
       payload: 3,
     });
-    const s2 = reducer(s1, {
+    const s2 = reducer<TestShape>(s1, {
       type: "STEP_TO_LAST",
     });
 
     expect(s2.steps.current).toBe(3);
     expect(s2.steps.canNext).toBe(false);
     expect(s2.steps.canPrevious).toBe(true);
+  });
+
+  test("SNAPSHOT_STATE", () => {
+    const s = reducer<TestShape>(initialState, {
+      type: "SNAPSHOT_STATE",
+    });
+
+    expect(JSON.stringify(s.form.snapshot)).toEqual(
+      JSON.stringify({
+        values: { ...initialState.values },
+        fields: { ...initialState.fields },
+        steps: { ...initialState.steps },
+        form: {
+          ...initialState.form,
+          snapshot: null,
+          history: [],
+          debug: false,
+        },
+      })
+    );
+  });
+
+  test("RESET", () => {
+    const s1 = reducer<TestShape>(initialState, {
+      type: "REGISTER_FIELD",
+      payload: {
+        name: "name",
+      },
+    });
+    const s2 = reducer<TestShape>(s1, {
+      type: "SET_TOTAL_STEPS",
+      payload: 3,
+    });
+    const s3 = reducer<TestShape>(s2, {
+      type: "SET_DEFAULT_CURRENT_STEP",
+      payload: 2,
+    });
+    const s4 = reducer<TestShape>(s3, {
+      type: "SET_DEFAULT_VALUES",
+      payload: {
+        name: "John Doe",
+      },
+    });
+    const s5 = reducer<TestShape>(s4, {
+      type: "SNAPSHOT_STATE",
+    });
+    const s6 = reducer<TestShape>(s5, {
+      type: "FIELD_CHANGE",
+      payload: {
+        name: "name",
+        value: "Jane Doe changed",
+      },
+    });
+    const s7 = reducer<TestShape>(s6, {
+      type: "RESET",
+    });
+
+    expect(JSON.stringify(s7)).toEqual(JSON.stringify(s4));
+  });
+
+  test("Debug mode", () => {
+    const s1 = reducer<TestShape>(initialState, {
+      type: "INIT",
+      payload: { debug: true },
+    });
+
+    const s2 = reducer<TestShape>(s1, {
+      type: "REGISTER_FIELD",
+      payload: {
+        name: "name",
+      },
+    });
+    const s3 = reducer<TestShape>(s2, {
+      type: "FIELD_CHANGE",
+      payload: {
+        name: "name",
+        value: "John Doe",
+      },
+    });
+    const s4 = reducer<TestShape>(s3, {
+      type: "SET_TOTAL_STEPS",
+      payload: 3,
+    });
+
+    expect(JSON.stringify(s4)).toBe(
+      JSON.stringify({
+        ...s4,
+        form: {
+          ...initialState.form,
+          debug: true,
+          history: [
+            { type: "INIT", payload: { debug: true } },
+            { type: "REGISTER_FIELD", payload: { name: "name" } },
+            {
+              type: "FIELD_CHANGE",
+              payload: { name: "name", value: "John Doe" },
+            },
+            { type: "SET_TOTAL_STEPS", payload: 3 },
+          ],
+        },
+      })
+    );
   });
 });

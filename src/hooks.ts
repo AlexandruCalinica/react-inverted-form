@@ -14,11 +14,19 @@ import { getStoreHandlers } from "./handlers";
 
 const store = new Store<FormState<any>>();
 
-export function useFormState<T extends GenericObject>(formId: string) {
+export function useFormState<T extends GenericObject>(
+  formId: string,
+  options?: { debug?: boolean }
+) {
   const [state, setState] = useState<FormState<T>>(() => getInitialState());
 
   useEffect(() => {
     store.init(formId);
+    store.dispatch(formId, {
+      type: "INIT",
+      payload: options,
+    });
+
     const subscription = store.subscribe(formId, setState);
     return () => subscription.unsubscribe();
   }, []);
@@ -97,11 +105,15 @@ interface UseFormOptions<T extends GenericObject> {
     values: T,
     metaProps: FormMetaProps<T>
   ) => Promise<Partial<{ [k in keyof T]: string }>>;
+  debug?: boolean;
 }
 
 export function useForm<T extends GenericObject>(options: UseFormOptions<T>) {
-  const state = useFormState<T>(options.formId);
+  const state = useFormState<T>(options.formId, {
+    debug: options?.debug ?? false,
+  });
   const {
+    reset,
     stepToLast,
     stepToNext,
     stepToFirst,
@@ -109,6 +121,7 @@ export function useForm<T extends GenericObject>(options: UseFormOptions<T>) {
     handleSubmit,
     registerField,
     setTotalSteps,
+    snapshotState,
     asyncDispatch,
     stepToPrevious,
     setCurrentStep,
@@ -146,10 +159,13 @@ export function useForm<T extends GenericObject>(options: UseFormOptions<T>) {
       submit: options?.onSubmit,
       validate: options?.validator,
     });
+
+    snapshotState();
   }, []);
 
   return {
     state,
+    reset,
     stepToNext,
     stepToLast,
     stepToFirst,

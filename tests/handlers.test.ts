@@ -58,6 +58,15 @@ describe("Store handlers", () => {
     it('should contain "handleSubmit" handler', () => {
       expect(handlers).toHaveProperty("handleSubmit");
     });
+    it('should contain "asyncDispatch" handler', () => {
+      expect(handlers).toHaveProperty("asyncDispatch");
+    });
+    it('should contain "snapshotState" handler', () => {
+      expect(handlers).toHaveProperty("snapshotState");
+    });
+    it('should contain "reset" handler', () => {
+      expect(handlers).toHaveProperty("reset");
+    });
   });
 
   describe("registerField", () => {
@@ -571,6 +580,119 @@ describe("Store handlers", () => {
       store.subscribe("foo", (next) => {
         expect(next.values["name"]).toBe("changed");
         expect(next.fields["name"].meta.pristine).toBe(false);
+      });
+    });
+  });
+
+  describe("asyncDispatch", () => {
+    const store = new Store<FormState<any>>();
+    store.init("foo");
+    const handlers = getStoreHandlers("foo", store);
+    const asyncDispatchSpy = jest.spyOn(handlers, "asyncDispatch");
+    const asyncCallback = jest.fn().mockResolvedValue({
+      name: "name",
+      value: "John Doe",
+    });
+
+    afterAll(() => {
+      asyncDispatchSpy.mockReset();
+    });
+
+    handlers.registerField("name");
+    handlers.setDefaultValues({ name: "" });
+    handlers.asyncDispatch("FIELD_CHANGE", asyncCallback);
+
+    it("should be callable", () => {
+      expect(asyncDispatchSpy).toHaveBeenCalled();
+      expect(asyncCallback).toHaveBeenCalled();
+    });
+
+    it.todo("should change the value in Store");
+  });
+
+  describe("asyncDispatch in other form", () => {
+    const store = new Store<FormState<any>>();
+    store.init("foo");
+    store.init("baz");
+
+    const fooHandlers = getStoreHandlers("foo", store);
+    const bazHandlers = getStoreHandlers("baz", store);
+
+    const asyncDispatchSpy = jest.spyOn(fooHandlers, "asyncDispatch");
+    const asyncCallback = jest.fn().mockResolvedValue({
+      name: "name",
+      value: "John Doe",
+    });
+
+    afterAll(() => {
+      asyncDispatchSpy.mockReset();
+    });
+
+    bazHandlers.registerField("name");
+    bazHandlers.setDefaultValues({ name: "" });
+    fooHandlers.asyncDispatch("FIELD_CHANGE", asyncCallback, { formId: "baz" });
+
+    it("should be callable", () => {
+      expect(asyncDispatchSpy).toHaveBeenCalled();
+      expect(asyncCallback).toHaveBeenCalled();
+    });
+
+    it.todo("should change the value in Store");
+  });
+
+  describe("snapshotState", () => {
+    const store = new Store<FormState<any>>();
+    store.init("foo");
+    const handlers = getStoreHandlers("foo", store);
+    const snapshotStateSpy = jest.spyOn(handlers, "snapshotState");
+
+    afterAll(() => {
+      snapshotStateSpy.mockReset();
+    });
+
+    handlers.snapshotState();
+
+    it("should be callable", () => {
+      expect(snapshotStateSpy).toHaveBeenCalled();
+    });
+
+    it("should change the value in Store", () => {
+      store.subscribe("foo", (next) => {
+        const { values, fields, form, steps } = mockState;
+        expect(JSON.stringify(next.form.snapshot)).toBe(
+          JSON.stringify({
+            values,
+            fields,
+            steps,
+            form: { ...form, snapshot: null },
+          })
+        );
+      });
+    });
+  });
+
+  describe("reset", () => {
+    const store = new Store<FormState<any>>();
+    store.init("foo");
+    const handlers = getStoreHandlers("foo", store);
+    const resetSpy = jest.spyOn(handlers, "reset");
+
+    afterAll(() => {
+      resetSpy.mockReset();
+    });
+
+    handlers.snapshotState();
+    handlers.registerField("name");
+    handlers.setDefaultValues({ name: "John Doe" });
+    handlers.reset();
+
+    it("should be callable", () => {
+      expect(resetSpy).toHaveBeenCalled();
+    });
+
+    it("state should be reset and should match the initial mockState", () => {
+      store.subscribe("foo", (next) => {
+        expect(JSON.stringify(next)).toBe(JSON.stringify(mockState));
       });
     });
   });

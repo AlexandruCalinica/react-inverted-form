@@ -21,5 +21,8 @@ export const mockState: FormState<any> = {
       submit: async () => undefined,
       validate: async () => ({}),
     },
+    snapshot: null,
+    history: [],
+    debug: false,
   },
 };

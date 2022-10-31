@@ -5,10 +5,12 @@ import {
   FormState,
   FormSteps,
   FieldProps,
-  GenericObject
+  GenericObject,
 } from "./types";
 
-export function getInitialMetaProps<T extends GenericObject>(): FormMeta<T> {
+export function getInitialMetaProps<T extends GenericObject>(options?: {
+  debug?: boolean;
+}): FormMeta<T> {
   return {
     isSubmitting: false,
     hasSubmitted: false,
@@ -19,8 +21,11 @@ export function getInitialMetaProps<T extends GenericObject>(): FormMeta<T> {
       change: () => undefined,
       blur: () => undefined,
       submit: async () => undefined,
-      validate: async () => ({})
-    }
+      validate: async () => ({}),
+    },
+    snapshot: null,
+    history: [],
+    debug: options?.debug ?? false,
   };
 }
 
@@ -29,16 +34,18 @@ export function getInitialStepsProps(): FormSteps {
     total: 1,
     current: 1,
     canNext: false,
-    canPrevious: false
+    canPrevious: false,
   };
 }
 
-export function getInitialState<T extends object>(): FormState<T> {
+export function getInitialState<T extends object>(options?: {
+  debug: boolean;
+}): FormState<T> {
   return {
     values: {} as T,
     fields: {} as Fields<T>,
     steps: getInitialStepsProps(),
-    form: getInitialMetaProps()
+    form: getInitialMetaProps(options),
   };
 }
 
@@ -54,8 +61,8 @@ export function applyDefaultValues<T extends object>(
       values: Object.assign(prevValues, defaultValues),
       form: {
         ...state.form,
-        hasDefaultValues: true
-      }
+        hasDefaultValues: true,
+      },
     };
   }
 
@@ -67,27 +74,40 @@ export function getInitialFieldProps(): FieldProps {
     meta: {
       pristine: true,
       hasError: false,
-      isTouched: false
-    }
+      isTouched: false,
+    },
   };
 }
 
-export function reducer<T extends object>(state: FormState<T>, action: Action) {
+export function reducer<T extends object>(
+  state: FormState<T>,
+  action: Action
+): FormState<T> {
+  if (state.form.debug) {
+    state.form.history.push(action);
+  }
+
   switch (action.type) {
     case "INIT": {
-      return getInitialState<T>();
+      const next = getInitialState<T>(action?.payload);
+
+      if (action.payload?.debug) {
+        next.form.history.push(action);
+      }
+
+      return next;
     }
     case "REGISTER_FIELD": {
       return {
         ...state,
         values: {
           ...state.values,
-          [action.payload]: null
+          [action.payload]: null,
         },
         fields: {
           ...state.fields,
-          [action.payload]: getInitialFieldProps()
-        }
+          [action.payload]: getInitialFieldProps(),
+        },
       };
     }
     case "SET_DEFAULT_VALUES":
@@ -101,8 +121,8 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
         ...state,
         form: {
           ...state.form,
-          handlers
-        }
+          handlers,
+        },
       };
     }
     case "FIELD_CHANGE": {
@@ -111,12 +131,12 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
 
       const prevValues = { ...values };
       const nextValues = Object.assign(prevValues, {
-        [name]: value
+        [name]: value,
       });
 
       return {
         ...state,
-        values: nextValues
+        values: nextValues,
       };
     }
     case "SET_FIELD_PRISTINE": {
@@ -129,7 +149,7 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
 
         return {
           ...state,
-          fields: nextFields
+          fields: nextFields,
         };
       }
 
@@ -141,12 +161,12 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
 
       const prevValues = { ...values };
       const nextValues = Object.assign(prevValues, {
-        [name]: value
+        [name]: value,
       });
 
       return {
         ...state,
-        values: nextValues
+        values: nextValues,
       };
     }
     case "SET_FIELD_TOUCHED": {
@@ -159,7 +179,7 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
 
         return {
           ...state,
-          fields: nextFields
+          fields: nextFields,
         };
       }
 
@@ -175,9 +195,9 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
               [name]: {
                 meta: {
                   ...(props as FieldProps).meta,
-                  hasError: false
-                }
-              }
+                  hasError: false,
+                },
+              },
             };
           }
 
@@ -187,10 +207,10 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
               ...(props as FieldProps),
               meta: {
                 ...(props as FieldProps).meta,
-                hasError: true
+                hasError: true,
               },
-              error: errors[name as keyof T]
-            }
+              error: errors[name as keyof T],
+            },
           };
         },
         state.fields
@@ -198,7 +218,7 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
 
       return {
         ...state,
-        fields
+        fields,
       };
     }
     case "IS_SUBMITTING": {
@@ -206,8 +226,8 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
         ...state,
         form: {
           ...state.form,
-          isSubmitting: true
-        }
+          isSubmitting: true,
+        },
       };
     }
     case "HAS_SUBMITTED": {
@@ -216,8 +236,8 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
         form: {
           ...state.form,
           isSubmitting: false,
-          hasSubmitted: true
-        }
+          hasSubmitted: true,
+        },
       };
     }
     case "ATTEMPTED_SUBMIT": {
@@ -225,8 +245,8 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
         ...state,
         form: {
           ...state.form,
-          attemptedSubmit: true
-        }
+          attemptedSubmit: true,
+        },
       };
     }
     case "SET_TOTAL_STEPS": {
@@ -237,8 +257,8 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
         steps: {
           ...state.steps,
           total,
-          canNext
-        }
+          canNext,
+        },
       };
     }
     case "SET_DEFAULT_CURRENT_STEP": {
@@ -252,12 +272,12 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
           ...state.steps,
           current,
           canNext,
-          canPrevious
+          canPrevious,
         },
         form: {
           ...state.form,
-          hasDefaultCurrentStep: true
-        }
+          hasDefaultCurrentStep: true,
+        },
       };
     }
     case "SET_CURRENT_STEP": {
@@ -271,8 +291,8 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
           ...state.steps,
           current,
           canNext,
-          canPrevious
-        }
+          canPrevious,
+        },
       };
     }
     case "STEP_TO_NEXT": {
@@ -288,8 +308,8 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
           ...state.steps,
           current,
           canNext,
-          canPrevious
-        }
+          canPrevious,
+        },
       };
     }
     case "STEP_TO_PREVIOUS": {
@@ -305,8 +325,8 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
           ...state.steps,
           current,
           canNext,
-          canPrevious
-        }
+          canPrevious,
+        },
       };
     }
     case "STEP_TO_FIRST": {
@@ -320,8 +340,8 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
           ...state.steps,
           current,
           canNext,
-          canPrevious
-        }
+          canPrevious,
+        },
       };
     }
     case "STEP_TO_LAST": {
@@ -335,8 +355,40 @@ export function reducer<T extends object>(state: FormState<T>, action: Action) {
           ...state.steps,
           current,
           canNext,
-          canPrevious
-        }
+          canPrevious,
+        },
+      };
+    }
+    case "SNAPSHOT_STATE": {
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          snapshot: {
+            values: { ...state.values },
+            fields: { ...state.fields },
+            steps: { ...state.steps },
+            form: {
+              ...state.form,
+            },
+          },
+        },
+      };
+    }
+    case "RESET": {
+      if (!state.form.snapshot) return state;
+
+      const { values, fields, form, steps } = state.form.snapshot;
+
+      return {
+        ...state,
+        values: { ...values },
+        fields: { ...fields },
+        steps: { ...steps },
+        form: {
+          ...state.form,
+          ...form,
+        },
       };
     }
     default:

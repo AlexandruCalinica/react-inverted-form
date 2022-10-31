@@ -12,6 +12,9 @@ const mock = {
     submit: async () => undefined,
     validate: async () => ({}),
   },
+  snapshot: null,
+  history: [],
+  debug: false,
 };
 
 describe("getInitialMetaProps", () => {

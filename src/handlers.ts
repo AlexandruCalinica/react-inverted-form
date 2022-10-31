@@ -38,8 +38,11 @@ interface StoreHandlers {
   ) => void;
   asyncDispatch: <T extends GenericObject>(
     type: ActionType,
-    payload: (state: FormState<T>) => Promise<unknown>
+    payload: (state: FormState<T>) => Promise<unknown>,
+    options?: { formId?: string }
   ) => void;
+  snapshotState: () => void;
+  reset: () => void;
 }
 
 export function getStoreHandlers(
@@ -85,6 +88,12 @@ export function getStoreHandlers(
   }
   function stepToLast() {
     store.dispatch(key, { type: "STEP_TO_LAST" });
+  }
+  function snapshotState() {
+    store.dispatch(key, { type: "SNAPSHOT_STATE" });
+  }
+  function reset() {
+    store.dispatch(key, { type: "RESET" });
   }
 
   function validate<T extends GenericObject>(options?: ValidateOptions) {
@@ -202,9 +211,10 @@ export function getStoreHandlers(
 
   function asyncDispatch(
     type: ActionType,
-    payload: (store: FormState<any>) => Promise<unknown>
+    payload: (store: FormState<any>) => Promise<unknown>,
+    options?: { formId?: string }
   ) {
-    store.asyncDispatch(key, type, payload);
+    store.asyncDispatch(options?.formId ?? key, type, payload);
   }
 
   return {
@@ -225,5 +235,7 @@ export function getStoreHandlers(
     handleFieldBlur,
     handleSubmit,
     asyncDispatch,
+    snapshotState,
+    reset,
   };
 }
