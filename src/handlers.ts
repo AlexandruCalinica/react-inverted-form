@@ -161,6 +161,8 @@ export function getStoreHandlers(
         value = (e as BaseSyntheticEvent).target.value;
       }
 
+      validate<T>({ attemptedSubmit: true });
+
       store
         .subscribe(key, (state) => {
           const values = state.values;
