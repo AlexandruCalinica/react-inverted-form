@@ -14,7 +14,7 @@ const config = {
     sourcemap: true,
     exports: "named",
   },
-  external: ["lodash", "rxjs", "class-validator", "react"],
+  external: ["lodash", "rxjs", "react"],
   plugins: [
     external(),
     typescript({

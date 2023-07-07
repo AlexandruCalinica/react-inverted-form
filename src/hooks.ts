@@ -6,9 +6,11 @@ import {
   Action,
   FormState,
   FieldProps,
+  InputProps,
   GenericObject,
   FormMetaProps,
   UseFieldOptions,
+  NativeInputProps,
 } from "./types";
 import { getStoreHandlers } from "./handlers";
 
@@ -34,7 +36,7 @@ export function useFormState<T extends GenericObject>(
   return state;
 }
 
-export function useField<T extends GenericObject>(
+export function useField<T extends GenericObject, Property extends keyof T>(
   name: keyof T,
   formId: string,
   options?: UseFieldOptions
@@ -53,16 +55,21 @@ export function useField<T extends GenericObject>(
     htmlFor: String(name),
   });
 
-  const getInputProps = () => {
-    return {
-      name,
-      id: name,
-      value: state.value,
-      onBlur: !options?.native ? handleFieldBlur(name) : undefined,
-      onChange: !options?.native ? handleFieldChange(name) : undefined,
-      onChangeText: options?.native ? handleFieldChange(name) : undefined,
-    };
-  };
+  const getInputProps = (): InputProps<T, Property> => ({
+    name: name as string,
+    id: name as string,
+    value: state.value,
+    onBlur: handleFieldBlur(name),
+    onChange: handleFieldChange(name),
+  });
+
+  const getNativeInputProps = (): NativeInputProps<T, Property> => ({
+    name: name as string,
+    id: name as string,
+    value: state.value,
+    onBlur: handleFieldBlur(name),
+    onChangeText: handleFieldChange(name),
+  });
 
   const renderError = (renderer: (error: string) => ReactNode) => {
     if (!state.meta?.error) return null;
@@ -85,6 +92,7 @@ export function useField<T extends GenericObject>(
     renderError,
     getInputProps,
     getLabelProps,
+    getNativeInputProps,
   };
 }
 

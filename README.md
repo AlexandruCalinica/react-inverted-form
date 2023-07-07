@@ -131,7 +131,109 @@ const state = useFormState<User>('user');
 `useFormState` receives a form id as an argument. The form id is the id of the form that you want to get the state of.
 
 ### Validators
-`react-inverted-form` comes with two built in validators. One for `yup` and one for `class-validator`. You can also create your own validator.
+`react-inverted-form` does not come with prebundled validators. However, we provdide a bunch of examples of validators that you can use. You can also use any other validator library that you want. The only requirement is that the validator must return a promise that resolves to an object of type `Record<string, unknown>` if it's an asynchronous validator or an object of type `Record<string, unknown>` if it's a synchronous validator.
+
+#### Examples of validators
+```ts
+import { validate, validateSync } from "class-validator";
+import { ValidationError, AnySchema } from "yup";
+
+export function createYupValidator(schema: AnySchema) {
+  return async function yupValidator(values: any) {
+    let errors = {};
+
+    try {
+      await schema.validate(values, { abortEarly: false, strict: true });
+    } catch (err) {
+      const keys = Object.keys((err as ValidationError).value)
+        .sort()
+        .reverse();
+      const messages = (err as ValidationError).errors;
+
+      const out = keys.reduce(
+        (acc, curr, idx) => ({ ...acc, [curr]: messages[idx] }),
+        {}
+      );
+      Object.assign(errors, out);
+    }
+
+    return errors;
+  };
+}
+
+export function createYupSyncValidator(schema: AnySchema) {
+  return function yupSyncValidator(values: any) {
+    let errors = {};
+
+    try {
+      schema.validateSync(values, { abortEarly: false, strict: true });
+    } catch (err) {
+      const keys = Object.keys((err as ValidationError).value)
+        .sort()
+        .reverse();
+      const messages = (err as ValidationError).errors;
+
+      const out = keys.reduce(
+        (acc, curr, idx) => ({ ...acc, [curr]: messages[idx] }),
+        {}
+      );
+      Object.assign(errors, out);
+    }
+
+    return errors;
+  };
+}
+
+export function createClassValidator<T extends object>(
+  Constructor: new () => T
+) {
+  let constructor = new Constructor();
+
+  return async function classValidator(values: any) {
+    let errors = {};
+    Object.assign(constructor, values);
+
+    try {
+      const err = await validate(constructor);
+      const out = err.reduce(
+        (acc, curr) => ({
+          ...acc,
+          [curr.property]: Object.values(curr?.constraints ?? {})[0],
+        }),
+        {}
+      );
+      Object.assign(errors, out);
+    } catch (error) {}
+
+    return errors;
+  };
+}
+
+export function createClassSyncValidator<T extends object>(
+  Constructor: new () => T
+) {
+  let constructor = new Constructor();
+
+  return function classValidator(values: any) {
+    let errors = {};
+    Object.assign(constructor, values);
+
+    try {
+      const err = validateSync(constructor);
+      const out = err.reduce(
+        (acc, curr) => ({
+          ...acc,
+          [curr.property]: Object.values(curr?.constraints ?? {})[0],
+        }),
+        {}
+      );
+      Object.assign(errors, out);
+    } catch (error) {}
+
+    return errors;
+  };
+}
+```
 #### `createYupValidator(schema: AnySchema): (values: any) => Promise<Record<string, any>>`
 ```ts
 const formSchema = object({

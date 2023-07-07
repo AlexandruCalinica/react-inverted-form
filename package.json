@@ -26,11 +26,9 @@
     "prepare": "husky install"
   },
   "peerDependencies": {
-    "class-validator": "^0.13.2",
     "lodash": "^4",
     "react": "^16.8.0 || ^17 || ^18",
-    "rxjs": "^7",
-    "yup": "^0.32.11"
+    "rxjs": "^7"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.2",
@@ -51,12 +49,15 @@
     "rollup-plugin-sourcemaps": "^0.6.3",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript2": "^0.33.0",
-    "semantic-release": "^19.0.3",
+    "semantic-release": "^21.0.7",
     "typescript": "^4.7.4"
   },
   "husky": {
     "hooks": {
       "prepare-commit-msg": "exec < /dev/tty && npx cz --hook || true"
     }
+  },
+  "resolutions": {
+    "semver": "^7.5.3"
   }
 }

@@ -91,3 +91,22 @@ export type StoreState = { [k: string]: FormState<GenericObject> };
 export type UseFieldOptions = {
   native?: boolean;
 };
+
+export interface InputProps<T extends GenericObject, Property extends keyof T> {
+  name: string;
+  id: string;
+  value: T[Property];
+  onBlur: (e: any) => void;
+  onChange: (e: any) => void;
+}
+
+export interface NativeInputProps<
+  T extends GenericObject,
+  Property extends keyof T
+> {
+  name: string;
+  id: string;
+  value: T[Property];
+  onBlur: (e: any) => void;
+  onChangeText: (e: any) => void;
+}
