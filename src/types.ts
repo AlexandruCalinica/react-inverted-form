@@ -95,7 +95,7 @@ export type UseFieldOptions = {
 export interface InputProps<T extends GenericObject, Property extends keyof T> {
   name: string;
   id: string;
-  value: T[Property];
+  value: any;
   onBlur: (e: any) => void;
   onChange: (e: any) => void;
 }
@@ -106,7 +106,7 @@ export interface NativeInputProps<
 > {
   name: string;
   id: string;
-  value: T[Property];
+  value: any;
   onBlur: (e: any) => void;
   onChangeText: (e: any) => void;
 }
