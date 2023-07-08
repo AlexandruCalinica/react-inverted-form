@@ -92,7 +92,7 @@ export type UseFieldOptions = {
   native?: boolean;
 };
 
-export interface InputProps<T extends GenericObject, Property extends keyof T> {
+export interface InputProps {
   name: string;
   id: string;
   value: any;
@@ -100,10 +100,7 @@ export interface InputProps<T extends GenericObject, Property extends keyof T> {
   onChange: (e: any) => void;
 }
 
-export interface NativeInputProps<
-  T extends GenericObject,
-  Property extends keyof T
-> {
+export interface NativeInputProps {
   name: string;
   id: string;
   value: any;

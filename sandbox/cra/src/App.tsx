@@ -1,13 +1,8 @@
-// import React from "react";
+import { useState } from "react";
 import "./styles.css";
 import { IsNotEmpty, IsPositive } from "class-validator";
 // import { object, string, number } from "yup";
-import {
-  useForm,
-  useField,
-  createClassValidator,
-  createClassSyncValidator,
-} from "./react-inverted-form";
+import { useForm, useField } from "./react-inverted-form";
 
 console.clear();
 
@@ -86,7 +81,7 @@ class Form implements FormState {
   @IsPositive()
   age = 0;
 }
-const validator = createClassValidator(Form);
+// const validator = createClassValidator(Form);
 
 class Step1Schema {
   @IsNotEmpty()
@@ -95,7 +90,7 @@ class Step1Schema {
   @IsNotEmpty()
   surname = "";
 }
-const validateStep1 = createClassSyncValidator(Step1Schema);
+// const validateStep1 = createClassSyncValidator(Step1Schema);
 
 // const formSchema = object({
 //   name: string().required("Name is required"),
@@ -104,6 +99,8 @@ const validateStep1 = createClassSyncValidator(Step1Schema);
 // });
 
 export default function App() {
+  const [plm, setPlm] = useState("plm");
+
   const {
     state,
     handleSubmit,
@@ -124,11 +121,17 @@ export default function App() {
         value: "",
       },
     },
-    debug: true,
+    // debug: true,
     stateReducer: (state, action, next) => {
       switch (action.type) {
         case "FIELD_CHANGE":
           const { name, value } = action.payload;
+          console.log("plm", plm);
+          if (plm === "mlp") {
+            setPlm("plm2");
+          } else {
+            setPlm("mlp");
+          }
           if (name === "age") {
             return {
               ...next,
@@ -142,15 +145,15 @@ export default function App() {
         case "STEP_TO_NEXT":
           if (state.steps.current === 1) {
             const { name, surname } = state.values;
-            const errors = validateStep1({ name, surname });
+            // const errors = validateStep1({ name, surname });
 
-            asyncDispatch("SET_VALIDATION_ERRORS", async () => {
-              return errors;
-            });
+            // asyncDispatch("SET_VALIDATION_ERRORS", async () => {
+            //   return errors;
+            // });
 
-            if (Object.values(errors).length > 0) {
-              return state;
-            }
+            // if (Object.values(errors).length > 0) {
+            //   return state;
+            // }
           }
           return next;
         default:
@@ -158,20 +161,21 @@ export default function App() {
       }
     },
     totalSteps: 2,
-    validator,
+    // validator,
     onSubmit: async (values) => {
       alert(JSON.stringify(values, null, 4));
     },
   });
 
-  const nameField = useField<FormState>("name", "foo");
-  const surnameField = useField<FormState>("surname", "foo");
-  const ageField = useField<FormState>("age", "foo");
-  const optionsField = useField<FormState>("options", "foo");
+  const nameField = useField("name", "foo");
+  const surnameField = useField("surname", "foo");
+  const ageField = useField("age", "foo");
+  const optionsField = useField("options", "foo");
 
   return (
     <div>
-      <pre>{JSON.stringify(state, null, 4)}</pre>
+      {/* <pre>{JSON.stringify(state, null, 4)}</pre> */}
+      {plm}
 
       <form onSubmit={handleSubmit}>
         {state.steps?.current === 1 && (

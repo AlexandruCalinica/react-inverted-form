@@ -55,7 +55,7 @@ export function useField<T extends GenericObject, Property extends keyof T>(
     htmlFor: String(name),
   });
 
-  const getInputProps = (): InputProps<T, Property> => ({
+  const getInputProps = (): InputProps => ({
     name: name as string,
     id: name as string,
     value: state.value,
@@ -63,7 +63,7 @@ export function useField<T extends GenericObject, Property extends keyof T>(
     onChange: handleFieldChange(name),
   });
 
-  const getNativeInputProps = (): NativeInputProps<T, Property> => ({
+  const getNativeInputProps = (): NativeInputProps => ({
     name: name as string,
     id: name as string,
     value: state.value,
@@ -170,6 +170,20 @@ export function useForm<T extends GenericObject>(options: UseFormOptions<T>) {
 
     snapshotState();
   }, []);
+
+  useEffect(() => {
+    if (options?.stateReducer) {
+      store.setReducer(
+        options.formId,
+        (reducer) => (state, action) =>
+          options.stateReducer?.(
+            state,
+            action,
+            reducer(state, action)
+          ) as FormState<T>
+      );
+    }
+  }, [options?.stateReducer]);
 
   return {
     state,
