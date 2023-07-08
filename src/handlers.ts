@@ -157,8 +157,8 @@ export function getStoreHandlers(
   function handleFieldBlur<T extends GenericObject>(name: keyof T) {
     return function (e: any) {
       let value = e;
-      if ((e as BaseSyntheticEvent).nativeEvent) {
-        value = (e as BaseSyntheticEvent).target.value;
+      if ((e as BaseSyntheticEvent)?.nativeEvent) {
+        value = (e as BaseSyntheticEvent)?.target?.value;
       }
 
       validate<T>({ attemptedSubmit: true });
