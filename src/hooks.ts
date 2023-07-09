@@ -72,8 +72,8 @@ export function useField<T extends GenericObject, Property extends keyof T>(
   });
 
   const renderError = (renderer: (error: string) => ReactNode) => {
-    if (!state.meta?.error) return null;
-    return renderer(state.meta.error ?? "");
+    if (!state?.meta?.error) return null;
+    return renderer(state?.meta?.error ?? "");
   };
 
   useEffect(() => {
