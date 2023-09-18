@@ -121,45 +121,7 @@ export default function App() {
         value: "",
       },
     },
-    // debug: true,
-    stateReducer: (state, action, next) => {
-      switch (action.type) {
-        case "FIELD_CHANGE":
-          const { name, value } = action.payload;
-          console.log("plm", plm);
-          if (plm === "mlp") {
-            setPlm("plm2");
-          } else {
-            setPlm("mlp");
-          }
-          if (name === "age") {
-            return {
-              ...next,
-              values: {
-                ...next.values,
-                [name]: parseFloat(value),
-              },
-            };
-          }
-          return next;
-        case "STEP_TO_NEXT":
-          if (state.steps.current === 1) {
-            const { name, surname } = state.values;
-            // const errors = validateStep1({ name, surname });
-
-            // asyncDispatch("SET_VALIDATION_ERRORS", async () => {
-            //   return errors;
-            // });
-
-            // if (Object.values(errors).length > 0) {
-            //   return state;
-            // }
-          }
-          return next;
-        default:
-          return next;
-      }
-    },
+    debug: true,
     totalSteps: 2,
     // validator,
     onSubmit: async (values) => {
@@ -174,7 +136,7 @@ export default function App() {
 
   return (
     <div>
-      {/* <pre>{JSON.stringify(state, null, 4)}</pre> */}
+      <pre>{JSON.stringify(state, null, 4)}</pre>
       {plm}
 
       <form onSubmit={handleSubmit}>

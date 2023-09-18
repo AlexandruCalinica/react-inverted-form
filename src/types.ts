@@ -96,6 +96,7 @@ export interface InputProps {
   name: string;
   id: string;
   value: any;
+  defaultValue: any;
   onBlur: (e: any) => void;
   onChange: (e: any) => void;
 }

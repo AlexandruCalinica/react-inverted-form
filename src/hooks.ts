@@ -16,6 +16,8 @@ import { getStoreHandlers } from "./handlers";
 
 const store = new Store<FormState<any>>();
 
+let defaultValuesStore: Record<string, object> = {};
+
 export function useFormState<T extends GenericObject>(
   formId: string,
   options?: { debug?: boolean }
@@ -59,6 +61,7 @@ export function useField<T extends GenericObject, Property extends keyof T>(
     name: name as string,
     id: name as string,
     value: state.value,
+    defaultValue: defaultValuesStore[formId]?.[name as keyof object],
     onBlur: handleFieldBlur(name),
     onChange: handleFieldChange(name),
   });
@@ -120,6 +123,11 @@ export function useForm<T extends GenericObject>(options: UseFormOptions<T>) {
   const state = useFormState<T>(options.formId, {
     debug: options?.debug ?? false,
   });
+
+  if (options.defaultValues && !defaultValuesStore[options.formId]) {
+    defaultValuesStore[options.formId] = options.defaultValues;
+  }
+
   const {
     reset,
     stepToLast,
