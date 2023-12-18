@@ -1,11 +1,13 @@
 import {
   map,
   pluck,
+  Subject,
   Observable,
   Subscription,
   BehaviorSubject,
   distinctUntilChanged,
   distinctUntilKeyChanged,
+  takeUntil,
 } from "rxjs";
 import isEqual from "lodash/isEqual";
 
@@ -29,6 +31,17 @@ export class Store<T> {
     Object.assign(this._states, {
       [key]: new BehaviorSubject(getInitialState()),
     });
+  }
+
+  destroy(key: string) {
+    delete this._reducers[key];
+
+    const destroy$ = new Subject();
+    this._states[key].pipe(takeUntil(destroy$)).subscribe();
+    destroy$.next(null);
+    destroy$.complete();
+
+    delete this._states[key];
   }
 
   setReducer(

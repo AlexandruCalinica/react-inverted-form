@@ -143,7 +143,7 @@ export function reducer<T extends object>(
       const { name, pristine } = action.payload;
       const { fields } = state;
 
-      if (fields[name as keyof T].meta.pristine) {
+      if (fields?.[name as keyof T]?.meta?.pristine) {
         const nextFields = { ...fields };
         nextFields[name as keyof T].meta.pristine = pristine;
 
@@ -173,7 +173,7 @@ export function reducer<T extends object>(
       const { name, isTouched } = action.payload;
       const { fields } = state;
 
-      if (!fields[name as keyof T].meta.isTouched) {
+      if (!fields?.[name as keyof T]?.meta?.isTouched) {
         const nextFields = { ...fields };
         nextFields[name as keyof T].meta.isTouched = isTouched;
 
@@ -194,7 +194,7 @@ export function reducer<T extends object>(
               ...acc,
               [name]: {
                 meta: {
-                  ...(props as FieldProps).meta,
+                  ...(props as FieldProps)?.meta,
                   hasError: false,
                 },
               },
@@ -206,7 +206,7 @@ export function reducer<T extends object>(
             [name]: {
               ...(props as FieldProps),
               meta: {
-                ...(props as FieldProps).meta,
+                ...(props as FieldProps)?.meta,
                 hasError: true,
               },
               error: errors[name as keyof T],

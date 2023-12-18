@@ -129,6 +129,7 @@ export function useForm<T extends GenericObject>(options: UseFormOptions<T>) {
 
   const {
     reset,
+    destroy,
     stepToLast,
     stepToNext,
     stepToFirst,
@@ -195,6 +196,7 @@ export function useForm<T extends GenericObject>(options: UseFormOptions<T>) {
   return {
     state,
     reset,
+    destroy,
     stepToNext,
     stepToLast,
     stepToFirst,

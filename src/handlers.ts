@@ -43,6 +43,7 @@ interface StoreHandlers {
   ) => void;
   snapshotState: () => void;
   reset: () => void;
+  destroy: () => void;
 }
 
 export function getStoreHandlers(
@@ -95,6 +96,9 @@ export function getStoreHandlers(
   function reset() {
     store.dispatch(key, { type: "RESET" });
   }
+  function destroy() {
+    store.destroy(key);
+  }
 
   function validate<T extends GenericObject>(options?: ValidateOptions) {
     store
@@ -130,8 +134,10 @@ export function getStoreHandlers(
     store
       .subscribe(key, (state) => {
         const { values, form } = state;
+        const handler = form?.handlers?.change;
+
         const nextValues = mergeCurrentWithPrevious<T>(name, value, values);
-        form.handlers.change?.(nextValues, getMetaProps<T>(state));
+        handler?.(nextValues, getMetaProps<T>(state));
       })
       .unsubscribe();
   }
@@ -166,7 +172,7 @@ export function getStoreHandlers(
       store
         .subscribe(key, (state) => {
           const values = state.values;
-          const handler = state.form.handlers?.blur;
+          const handler = state?.form?.handlers?.blur;
 
           const nextValues = mergeCurrentWithPrevious<T>(name, value, values);
           handler?.(nextValues, getMetaProps<T>(state));
@@ -239,5 +245,6 @@ export function getStoreHandlers(
     asyncDispatch,
     snapshotState,
     reset,
+    destroy,
   };
 }
