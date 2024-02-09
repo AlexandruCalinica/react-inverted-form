@@ -60,7 +60,10 @@ export function useField<T extends GenericObject, Property extends keyof T>(
   const getInputProps = (): InputProps => ({
     name: name as string,
     id: name as string,
-    value: state.value ?? defaultValuesStore[formId]?.[name as keyof object],
+    value:
+      typeof state.value !== "undefined"
+        ? state.value
+        : defaultValuesStore?.[formId]?.[name as keyof object],
     onBlur: handleFieldBlur(name),
     onChange: handleFieldChange(name),
   });
@@ -68,7 +71,10 @@ export function useField<T extends GenericObject, Property extends keyof T>(
   const getNativeInputProps = (): NativeInputProps => ({
     name: name as string,
     id: name as string,
-    value: state.value ?? defaultValuesStore[formId]?.[name as keyof object],
+    value:
+      typeof state.value !== "undefined"
+        ? state.value
+        : defaultValuesStore?.[formId]?.[name as keyof object],
     onBlur: handleFieldBlur(name),
     onChangeText: handleFieldChange(name),
   });
