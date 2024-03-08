@@ -4,6 +4,8 @@ import { Store } from "./store";
 import { GenericObject, FormHandlers, FormState, ActionType } from "./types";
 import { mergeCurrentWithPrevious, getMetaProps } from "./utils";
 
+export let defaultValuesStore: Record<string, object> = {};
+
 interface ValidateOptions {
   attemptedSubmit?: boolean;
 }
@@ -58,6 +60,8 @@ export function getStoreHandlers(
       type: "SET_DEFAULT_VALUES",
       payload: defaultValues,
     });
+
+    defaultValuesStore[key] = defaultValues;
   }
   function setHandlers<T extends GenericObject>(
     handlers: Partial<FormHandlers<T>>

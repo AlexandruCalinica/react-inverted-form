@@ -12,11 +12,9 @@ import {
   UseFieldOptions,
   NativeInputProps,
 } from "./types";
-import { getStoreHandlers } from "./handlers";
+import { getStoreHandlers, defaultValuesStore } from "./handlers";
 
 const store = new Store<FormState<any>>();
-
-let defaultValuesStore: Record<string, object> = {};
 
 export function useFormState<T extends GenericObject>(
   formId: string,
