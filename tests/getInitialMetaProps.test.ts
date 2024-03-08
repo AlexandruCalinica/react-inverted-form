@@ -3,6 +3,7 @@ import { getInitialMetaProps } from "../src/core";
 const mock = {
   isSubmitting: false,
   hasSubmitted: false,
+  hasInitiated: false,
   attemptedSubmit: false,
   hasDefaultValues: false,
   hasDefaultCurrentStep: false,

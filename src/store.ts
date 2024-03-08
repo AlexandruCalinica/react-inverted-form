@@ -2,12 +2,12 @@ import {
   map,
   pluck,
   Subject,
+  takeUntil,
   Observable,
   Subscription,
   BehaviorSubject,
   distinctUntilChanged,
   distinctUntilKeyChanged,
-  takeUntil,
 } from "rxjs";
 import isEqual from "lodash/isEqual";
 
@@ -91,6 +91,21 @@ export class Store<T> {
     return this._states[stateKey]?.subscribe(callback);
   }
 
+  getSubscribe = (stateKey: string) => (callback: (state: T) => void) => {
+    const subscription = this._states[stateKey]?.subscribe(callback);
+
+    return () => subscription.unsubscribe();
+  };
+
+  getFieldSubscribe =
+    (stateKey: string, fieldName: string) => (callback: () => void) => {
+      const subscription = this.selectField(stateKey, fieldName).subscribe(
+        callback
+      );
+
+      return () => subscription.unsubscribe();
+    };
+
   dispatch = (stateKey: string, action: Action): void => {
     this._checkPrerequisites(stateKey);
 
@@ -108,6 +123,37 @@ export class Store<T> {
 
     const payload = await runner(this._states[stateKey].getValue());
     this.dispatch(stateKey, { type, payload });
+  };
+
+  initState = (stateKey: string, options?: { debug?: boolean }) => {
+    try {
+      this._checkPrerequisites(stateKey);
+    } catch (e) {
+      this.init(stateKey);
+      this.dispatch(stateKey, {
+        type: "INIT",
+        payload: options,
+      });
+    }
+  };
+
+  getSnapshot = (stateKey: string) => () => {
+    return this._states[stateKey].getValue();
+  };
+
+  getFieldMetaSnapshot = (stateKey: string, fieldName: string) => () => {
+    return (this._states[stateKey].getValue() as unknown as FormState<any>)
+      ?.fields?.[fieldName];
+  };
+
+  getFieldValueSnapshot = (stateKey: string, fieldName: string) => () => {
+    return (this._states[stateKey].getValue() as unknown as FormState<any>)
+      ?.values?.[fieldName];
+  };
+
+  getFieldErrorSnapshot = (stateKey: string, fieldName: string) => () => {
+    return (this._states[stateKey].getValue() as unknown as FormState<any>)
+      ?.fields?.[fieldName]?.error;
   };
 
   private _checkPrerequisites(key: string) {

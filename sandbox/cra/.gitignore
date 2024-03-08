@@ -25,3 +25,7 @@ yarn-error.log*
 /src/react-inverted-form/index.d.ts
 /src/react-inverted-form/index.js.map
 /src/react-inverted-form/package.json
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

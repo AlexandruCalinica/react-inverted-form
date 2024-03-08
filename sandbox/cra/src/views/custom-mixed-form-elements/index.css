@@ -1,0 +1,11 @@
+.customInput {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  align-items: flex-start;
+  border: 2px dashed salmon;
+}
+
+.customInput > p {
+  align-self: flex-start;
+}

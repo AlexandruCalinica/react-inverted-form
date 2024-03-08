@@ -1,6 +1,12 @@
 button {
   padding: 8px;
-  /* border-radius: 6px; */
+}
+
+.navbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
 }
 
 .App {

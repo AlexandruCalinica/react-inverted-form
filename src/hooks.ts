@@ -1,11 +1,15 @@
-import { useState, useEffect, ReactNode } from "react";
+import {
+  useMemo,
+  useEffect,
+  ReactNode,
+  useCallback,
+  useSyncExternalStore,
+} from "react";
 
 import { Store } from "./store";
-import { getInitialState, getInitialFieldProps } from "./core";
 import {
   Action,
   FormState,
-  FieldProps,
   InputProps,
   GenericObject,
   FormMetaProps,
@@ -22,35 +26,88 @@ export function useFormState<T extends GenericObject>(
   formId: string,
   options?: { debug?: boolean }
 ) {
-  const [state, setState] = useState<FormState<T>>(() => getInitialState());
+  store.initState(formId, options);
 
-  useEffect(() => {
-    store.init(formId);
-    store.dispatch(formId, {
-      type: "INIT",
-      payload: options,
-    });
-
-    const subscription = store.subscribe(formId, setState);
-    return () => subscription.unsubscribe();
-  }, []);
+  const subscribe = useCallback(store.getSubscribe(formId), [formId]);
+  const getSnapshot = useCallback(store.getSnapshot(formId), [formId]);
+  const state = useSyncExternalStore<FormState<T>>(subscribe, getSnapshot);
 
   return state;
 }
 
-export function useField<T extends GenericObject, Property extends keyof T>(
+export function useFieldMeta<T extends GenericObject>(
+  formId: string,
+  name: keyof T
+) {
+  const subscribe = useCallback(
+    store.getFieldSubscribe(formId, name as string),
+    [formId, name]
+  );
+  const getMetaSnapshot = useCallback(
+    store.getFieldMetaSnapshot(formId, name as string),
+    [formId, name]
+  );
+
+  return useSyncExternalStore(subscribe, getMetaSnapshot);
+}
+
+export function useFieldValue<T extends GenericObject>(
+  formId: string,
+  name: keyof T
+) {
+  const subscribe = useCallback(
+    store.getFieldSubscribe(formId, name as string),
+    [formId, name]
+  );
+  const getValueSnapshot = useCallback(
+    store.getFieldValueSnapshot(formId, name as string),
+    [formId, name]
+  );
+
+  return useSyncExternalStore(subscribe, getValueSnapshot);
+}
+
+export function useFieldError<T extends GenericObject>(
+  formId: string,
+  name: keyof T
+) {
+  const subscribe = useCallback(
+    store.getFieldSubscribe(formId, name as string),
+    [formId, name]
+  );
+  const getErrorSnapshot = useCallback(
+    store.getFieldErrorSnapshot(formId, name as string),
+    [formId, name]
+  );
+
+  return useSyncExternalStore(subscribe, getErrorSnapshot);
+}
+
+export function useField<T extends GenericObject>(
   name: keyof T,
   formId: string,
   options?: UseFieldOptions
 ) {
-  const [state, setState] = useState<{ value: any; meta: FieldProps }>({
-    value: defaultValuesStore[formId]?.[name as keyof object],
-    meta: getInitialFieldProps(),
-  });
+  store.initState(formId);
+
+  const meta = useFieldMeta<T>(formId, name);
+  const value = useFieldValue<T>(formId, name);
+  const error = useFieldError<T>(formId, name);
 
   const { handleFieldBlur, handleFieldChange } = getStoreHandlers(
     formId,
     store
+  );
+
+  const state = useMemo(
+    () => ({ value, meta }),
+    [
+      value,
+      meta?.error,
+      meta?.meta?.hasError,
+      meta?.meta?.pristine,
+      meta?.meta?.isTouched,
+    ]
   );
 
   const getLabelProps = () => ({
@@ -60,7 +117,7 @@ export function useField<T extends GenericObject, Property extends keyof T>(
   const getInputProps = (): InputProps => ({
     name: name as string,
     id: name as string,
-    value: state.value ?? defaultValuesStore[formId]?.[name as keyof object],
+    value: value ?? defaultValuesStore[formId]?.[name as keyof object],
     onBlur: handleFieldBlur(name),
     onChange: handleFieldChange(name),
   });
@@ -68,26 +125,15 @@ export function useField<T extends GenericObject, Property extends keyof T>(
   const getNativeInputProps = (): NativeInputProps => ({
     name: name as string,
     id: name as string,
-    value: state.value ?? defaultValuesStore[formId]?.[name as keyof object],
+    value: value ?? defaultValuesStore[formId]?.[name as keyof object],
     onBlur: handleFieldBlur(name),
     onChangeText: handleFieldChange(name),
   });
 
   const renderError = (renderer: (error: string) => ReactNode) => {
-    if (!state?.meta?.error) return null;
-    return renderer(state?.meta?.error ?? "");
+    if (!error) return null;
+    return renderer(error ?? "");
   };
-
-  useEffect(() => {
-    store.init(formId);
-  }, []);
-
-  useEffect(() => {
-    const subscription = store
-      .selectField(formId, name as string)
-      .subscribe(setState);
-    return () => subscription.unsubscribe();
-  }, [name]);
 
   return {
     state,
@@ -137,7 +183,6 @@ export function useForm<T extends GenericObject>(options: UseFormOptions<T>) {
     handleSubmit,
     registerField,
     setTotalSteps,
-    snapshotState,
     asyncDispatch,
     stepToPrevious,
     setCurrentStep,
@@ -175,8 +220,6 @@ export function useForm<T extends GenericObject>(options: UseFormOptions<T>) {
       submit: options?.onSubmit,
       validate: options?.validator,
     });
-
-    snapshotState();
   }, []);
 
   useEffect(() => {

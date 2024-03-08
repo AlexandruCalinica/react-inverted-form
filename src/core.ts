@@ -10,10 +10,12 @@ import {
 
 export function getInitialMetaProps<T extends GenericObject>(options?: {
   debug?: boolean;
+  hasInitiated?: boolean;
 }): FormMeta<T> {
   return {
     isSubmitting: false,
     hasSubmitted: false,
+    hasInitiated: options?.hasInitiated || false,
     attemptedSubmit: false,
     hasDefaultValues: false,
     hasDefaultCurrentStep: false,
@@ -25,7 +27,7 @@ export function getInitialMetaProps<T extends GenericObject>(options?: {
     },
     snapshot: null,
     history: [],
-    debug: options?.debug ?? false,
+    debug: options?.debug || false,
   };
 }
 
@@ -39,7 +41,8 @@ export function getInitialStepsProps(): FormSteps {
 }
 
 export function getInitialState<T extends object>(options?: {
-  debug: boolean;
+  debug?: boolean;
+  hasInitiated?: boolean;
 }): FormState<T> {
   return {
     values: {} as T,
@@ -89,7 +92,12 @@ export function reducer<T extends object>(
 
   switch (action.type) {
     case "INIT": {
-      const next = getInitialState<T>(action?.payload);
+      if (state?.form?.hasInitiated) return state;
+
+      const next = getInitialState<T>({
+        ...action?.payload,
+        hasInitiated: true,
+      });
 
       if (action.payload?.debug) {
         next.form.history.push(action);

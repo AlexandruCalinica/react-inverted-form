@@ -1,10 +1,5 @@
-import { useState } from "react";
-import "./styles.css";
-import { IsNotEmpty, IsPositive } from "class-validator";
-// import { object, string, number } from "yup";
 import { useForm, useField } from "./react-inverted-form";
-
-console.clear();
+import { useState } from "react";
 
 interface CustomInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
@@ -61,7 +56,7 @@ const Options: React.FC<{
 };
 
 interface FormState {
-  name: string;
+  firstname: string;
   surname: string;
   age: number;
   options?: {
@@ -70,36 +65,8 @@ interface FormState {
   };
 }
 
-class Form implements FormState {
-  @IsNotEmpty()
-  name = "";
-
-  @IsNotEmpty()
-  surname = "";
-
-  @IsNotEmpty()
-  @IsPositive()
-  age = 0;
-}
-// const validator = createClassValidator(Form);
-
-class Step1Schema {
-  @IsNotEmpty()
-  name = "";
-
-  @IsNotEmpty()
-  surname = "";
-}
-// const validateStep1 = createClassSyncValidator(Step1Schema);
-
-// const formSchema = object({
-//   name: string().required("Name is required"),
-//   surname: string().required("Surname is required"),
-//   age: number().positive().required("Age is required")
-// });
-
 export default function App() {
-  const [plm, setPlm] = useState("plm");
+  const [res, setRes] = useState("");
 
   const {
     state,
@@ -108,42 +75,36 @@ export default function App() {
     stepToPrevious,
     stepToFirst,
     stepToLast,
-    asyncDispatch,
     reset,
   } = useForm<FormState>({
     formId: "foo",
     defaultValues: {
-      name: "",
-      surname: "Calinica",
-      age: 29,
+      firstname: "",
+      surname: "",
+      age: 0,
       options: {
         key: 0,
         value: "",
       },
     },
-    debug: true,
     totalSteps: 2,
-    // validator,
     onSubmit: async (values) => {
-      alert(JSON.stringify(values, null, 4));
+      setRes(JSON.stringify(values, null, 4));
     },
   });
 
-  const nameField = useField("name", "foo");
+  const nameField = useField("firstname", "foo");
   const surnameField = useField("surname", "foo");
   const ageField = useField("age", "foo");
   const optionsField = useField("options", "foo");
 
   return (
     <div>
-      <pre>{JSON.stringify(state, null, 4)}</pre>
-      {plm}
-
       <form onSubmit={handleSubmit}>
         {state.steps?.current === 1 && (
           <>
             <div className="form-element">
-              <label {...nameField.getLabelProps()}>Name</label>
+              <label {...nameField.getLabelProps()}>Firstname</label>
               <input {...nameField.getInputProps()} />
               {nameField.renderError((error) => (
                 <span className="error">{error}</span>
@@ -170,7 +131,7 @@ export default function App() {
               ))}
             </div>
 
-            {!!state.values.age && (
+            {!!state?.values?.age && (
               <div className="form-element">
                 <label {...optionsField.getLabelProps()}>Options</label>
                 <Options {...optionsField.getInputProps()} />
@@ -208,6 +169,8 @@ export default function App() {
         <button type="submit">Submit</button>
       </form>
       <button onClick={reset}>reset</button>
+
+      {res && <pre>{res}</pre>}
     </div>
   );
 }

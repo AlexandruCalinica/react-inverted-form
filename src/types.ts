@@ -64,6 +64,7 @@ export type Snapshot<T extends GenericObject> = {
 export type FormMeta<T extends GenericObject> = {
   isSubmitting: boolean;
   hasSubmitted: boolean;
+  hasInitiated: boolean;
   attemptedSubmit: boolean;
   hasDefaultValues: boolean;
   hasDefaultCurrentStep: boolean;

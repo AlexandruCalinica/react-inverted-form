@@ -16,7 +16,15 @@ describe("reducer", () => {
   test("INIT", () => {
     const nextState = reducer<TestShape>(initialState, { type: "INIT" });
 
-    expect(JSON.stringify(nextState)).toBe(JSON.stringify(initialState));
+    expect(JSON.stringify(nextState)).toBe(
+      JSON.stringify({
+        ...initialState,
+        form: {
+          ...initialState.form,
+          hasInitiated: true,
+        },
+      })
+    );
   });
 
   test("INIT with debug", () => {
@@ -30,6 +38,7 @@ describe("reducer", () => {
         ...initialState,
         form: {
           ...initialState.form,
+          hasInitiated: true,
           debug: true,
           history: [{ type: "INIT", payload: { debug: true } }],
         },
@@ -438,6 +447,7 @@ describe("reducer", () => {
         form: {
           ...initialState.form,
           debug: true,
+          hasInitiated: true,
           history: [
             { type: "INIT", payload: { debug: true } },
             { type: "REGISTER_FIELD", payload: { name: "name" } },

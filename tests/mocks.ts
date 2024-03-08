@@ -12,6 +12,7 @@ export const mockState: FormState<any> = {
   form: {
     isSubmitting: false,
     hasSubmitted: false,
+    hasInitiated: false,
     attemptedSubmit: false,
     hasDefaultValues: false,
     hasDefaultCurrentStep: false,
